@@ -3,6 +3,8 @@ import pandas as pd
 import requests
 import dotenv
 import os
+import argparse
+from datetime import datetime 
 
 dotenv.load_dotenv()
 REVERB_TOKEN = os.getenv("REVERB_TOKEN")
@@ -55,7 +57,7 @@ class Collector:
         os.makedirs(self.output_folder, exist_ok=True)
 
         df = pd.DataFrame(listings)
-        df.to_parquet(f"{self.output_folder}/listings_batch_{count:02}.parquet", index=False)
+        df.to_parquet(f"{self.output_folder}/{datetime.now().date()}_batch_{count:02}.parquet", index=False)
 
     def extract_batches(self, n_batches:int=10, count:int=0):
 
@@ -67,7 +69,13 @@ class Collector:
             count += 1
     
 # %%
+if __name__ == "__main__":
 
-collect = Collector(REVERB_TOKEN)
-collect.extract_batches()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--n_batches", type=int, default=10)
+
+    args = parser.parse_args()
+
+    collect = Collector(REVERB_TOKEN)
+    collect.extract_batches(n_batches=args.n_batches)
 # %%
