@@ -3,3 +3,4 @@ test.py
 *.parquet
 .vscode
 *.duckdb
+*.duckdb.wal
