@@ -14,7 +14,7 @@ Transformação, tratamento e enriquecimento dos dados.
 Criação de tabelas analíticas e novas features para consumo analítico.
 Fluxo de Dados
 
-API Reverb → Python (Extração) → DuckDB (Camadas Bronze, Silver e Gold) → Análise
+API Reverb → Python (Extração) → DuckDB (Camadas Bronze, Silver e Gold) → Dashboard Power BI para Análise 
 
 Tecnologias Utilizadas
 Python
@@ -39,4 +39,4 @@ Coleta de dados via API REST.
 Armazenamento dos dados brutos no DuckDB
 Organização dos dados em arquitetura de camadas (Bronze, Silver e Gold).
 Transformações SQL 
-Criação de tabelas analíticas para exploração e análise de dados.
+Criação de tabelas analíticas para exploração e análise de dados no Power BI.

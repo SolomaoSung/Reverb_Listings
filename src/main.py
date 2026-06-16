@@ -25,6 +25,7 @@ def transform_raw_data():
         result = con.execute("SELECT * FROM bronze_listings").fetchdf()
         t = Transformer()
         df = t.process_data(result)
+        df = df.drop_duplicates(subset=["id"])
         con.register("processed_df", df)
         con.execute("CREATE TABLE IF NOT EXISTS silver_listings AS SELECT *" \
         "FROM processed_df LIMIT 0")
@@ -44,4 +45,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-# %%
+          # %%

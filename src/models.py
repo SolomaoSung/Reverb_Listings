@@ -3,16 +3,22 @@ queries = {
     "tb_category": """
         SELECT ROW_NUMBER() OVER(ORDER BY category_name) AS category_id, category_name
         FROM (
-            SELECT DISTINCT UNNEST(SPLIT(categories_full_name, '/')) AS category_name
+        SELECT DISTINCT TRIM(category_name) AS category_name
+        FROM(
+            SELECT UNNEST(SPLIT(categories_full_name, '/')) AS category_name
             FROM silver_listings
-        )
+        ))
     """,
 
     "tb_listings_category": """
         WITH listings_category AS (
             SELECT DISTINCT id AS listings_id,
-                   UNNEST(SPLIT(categories_full_name, '/')) AS category_name
-            FROM silver_listings
+            TRIM(category_name) AS category_name
+            FROM(
+            SELECT
+                id,
+                UNNEST(SPLIT(categories_full_name, '/')) AS category_name
+            FROM silver_listings)
         )
         SELECT ROW_NUMBER() OVER() AS listings_category_id,
                t2.listings_id,
@@ -55,7 +61,7 @@ queries = {
     "tb_shipping_rates_region": """
         SELECT ROW_NUMBER() OVER(ORDER BY id, shipping_rates_region_code) AS shipping_rate_id,
                t1.id AS listings_id,
-               t2.shipping_region,
+               t2.shipping_region_id,
                t1."shipping_initial_offer_rate.rate_original.amount",
                t1."shipping_initial_offer_rate.rate_original.amount_cents",
                t1."shipping_initial_offer_rate.rate_original.currency",
@@ -146,61 +152,3 @@ queries = {
           ON t1.make = t3.make_name
     """
 }
-# %%
-import duckdb
-
-con = duckdb.connect("../data/reverb.duckdb")
-
-con.execute("""SELECT DISTINCT t1.id AS listings_id,
-            t3.make_id,
-            t1.model,
-            t1.finish,
-            t1.year,
-            t1.title,
-            t1.created_at,
-            t1.description,
-            t1.inventory,
-            t1.has_inventory,
-            t1.offers_enabled,
-            t1.listing_currency,
-            t1.published_at,
-            t1.auction,
-            t1.shop_id,
-            t1.us_outlet,
-            t1.sku,
-            t1.price_guide_id,
-            t1.original_price_description,
-            t2.condition_id,
-            t1.price_tax_included,
-            t1.price_amount,
-            t1.price_amount_cents,
-            t1.price_currency,
-            t1.price_symbol,
-            t1.price_display,
-            t1.buyer_price_tax_included,
-            t1.buyer_price_amount,
-            t1.buyer_price_amount_cents,
-            t1.buyer_price_currency,
-            t1.buyer_price_symbol,
-            t1.buyer_price_display,
-            t1.state_slug,
-            t1.state_description,
-            t1.shipping_free_expedited_shipping,
-            t1.shipping_local,
-            t1.original_price_tax_included,
-            t1.original_price_amount,
-            t1.original_price_amount_cents,
-            t1.original_price_currency,
-            t1.original_price_symbol,
-            t1.original_price_display,
-            t1.ribbon_display,
-            t1.ribbon_reason,
-            t1.sale_ribbon_display
-        FROM silver_listings t1
-        LEFT JOIN tb_condition t2
-          ON t1.condition_display_name = t2.condition_name
-        LEFT JOIN tb_make t3
-          ON t1.make = t3.make_name""").fetchdf()
-
-
-# %%
