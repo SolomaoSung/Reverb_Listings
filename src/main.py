@@ -7,6 +7,7 @@ import os
 import duckdb
 import pandas as pd
 from models import queries
+from export import export_to_parquet
 
 dotenv.load_dotenv()
 REVERB_TOKEN = os.getenv("REVERB_TOKEN")
@@ -27,10 +28,12 @@ def transform_raw_data():
         df = t.process_data(result)
         df = df.drop_duplicates(subset=["id"])
         con.register("processed_df", df)
-        con.execute("CREATE TABLE IF NOT EXISTS silver_listings AS SELECT *" \
-        "FROM processed_df LIMIT 0")
-        con.execute("INSERT INTO silver_listings SELECT * FROM processed_df d" \
-        " WHERE NOT EXISTS (SELECT 1 FROM silver_listings lp WHERE lp.id = d.id )")
+        con.execute("""CREATE TABLE IF NOT EXISTS silver_listings AS SELECT *
+        FROM processed_df LIMIT 0""")
+        con.execute("""INSERT INTO silver_listings SELECT 
+                    DISTINCT * FROM processed_df d
+                    WHERE NOT EXISTS 
+                    (SELECT 1 FROM silver_listings lp WHERE lp.id = d.id )""")
 
 def main():
     # Camada Bronze
@@ -42,6 +45,8 @@ def main():
     for table, query in queries.items():
         s.send_query_data(table, query)
 
+    export_to_parquet()
+    
 if __name__ == "__main__":
     main()
 
