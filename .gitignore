@@ -1,6 +1,6 @@
 .env
-test.py
 *.parquet
 .vscode
-*.duckdb
-*.duckdb.wal
+.json
+reports
+__pycache__
